@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 
 class Course(models.Model):
@@ -8,6 +9,13 @@ class Course(models.Model):
     description = models.TextField(_('description'), blank=True, null=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Владелец'
+    )
 
     class Meta:
         verbose_name = _('course')
@@ -30,6 +38,13 @@ class Lesson(models.Model):
     video_link = models.URLField(_('video link'))
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Владелец'
+    )
 
     class Meta:
         verbose_name = _('lesson')

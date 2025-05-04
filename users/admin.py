@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Payment
+from django.contrib.auth.models import Group
 
 
 class CustomUserAdmin(UserAdmin):
@@ -29,3 +30,7 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('user', 'payment_date', 'paid_course', 'paid_lesson', 'amount', 'payment_method')
     list_filter = ('payment_method', 'payment_date')
     search_fields = ('user__email', 'paid_course__title', 'paid_lesson__title')
+
+@admin.register(Group)
+class CustomGroupAdmin(admin.ModelAdmin):
+    filter_horizontal = ['permissions']

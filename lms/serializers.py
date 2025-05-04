@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Course, Lesson
 
 class LessonSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
     class Meta:
         model = Lesson
         fields = ['id', 'course', 'title', 'description', 'preview', 'video_link', 'created_at', 'updated_at']
@@ -10,6 +13,9 @@ class LessonSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     lessons_count = serializers.SerializerMethodField()
     lessons = LessonSerializer(many=True, read_only=True, source='lessons.all')
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = Course
