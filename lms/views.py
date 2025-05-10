@@ -1,14 +1,21 @@
-from rest_framework import viewsets
+from django.db.models import Exists, OuterRef
+from rest_framework import viewsets, status
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from config.users.permissions import IsModerator, IsOwner, IsOwnerOrModerator
+from .models import Subscription
+from .serializers import SubscriptionSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .paginators import CoursePaginator, LessonPaginator
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CoursePaginator
 
     def get_permissions(self):
         if self.action == 'create':
@@ -28,14 +35,22 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not (self.request.user.is_staff or self.request.user.groups.filter(name='moderators').exists()):
-            queryset = queryset.filter(owner=self.request.user)
+        if self.request.user.is_authenticated:
+            queryset = queryset.annotate(
+                is_subscribed=Exists(
+                    Subscription.objects.filter(
+                        user=self.request.user,
+                        course=OuterRef('pk')
+                    )
+                )
+            )
         return queryset
 
 
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    pagination_class = LessonPaginator
 
     def get_permissions(self):
         if self.action == 'create':
@@ -68,3 +83,39 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
 class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+
+
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['post'])
+    def subscribe(self, request):
+        course_id = request.data.get('course_id')
+        if not course_id:
+            return Response({'error': 'course_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+
+        subscription, created = Subscription.objects.get_or_create(
+            user=request.user,
+            course_id=course_id
+        )
+
+        if created:
+            return Response({'status': 'подписка создана'}, status=status.HTTP_201_CREATED)
+        return Response({'status': 'вы уже подписаны'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'])
+    def unsubscribe(self, request):
+        course_id = request.data.get('course_id')
+        if not course_id:
+            return Response({'error': 'course_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+
+        deleted, _ = Subscription.objects.filter(
+            user=request.user,
+            course_id=course_id
+        ).delete()
+
+        if deleted:
+            return Response({'status': 'подписка удалена'}, status=status.HTTP_200_OK)
+        return Response({'status': 'подписка не найдена'}, status=status.HTTP_404_NOT_FOUND)
