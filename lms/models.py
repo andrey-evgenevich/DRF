@@ -86,3 +86,36 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.user.email} подписан на {self.course.title}'
+
+class Payment(models.Model):
+    amount = models.PositiveIntegerField(
+        verbose_name='Сумма',
+        help_text='Введите сумму'
+    )
+    session_id = models.CharField(
+        max_length=255,
+        blank=True, null=True,
+        verbose_name='ID сессии',
+        help_text='Укадите ID сессии'
+    )
+    link = models.URLField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Ссылка на оплату',
+        help_text='Укажите ссылку на оплату'
+        )
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name='Пользователь',
+        help_text='Укажите пользователя'
+        )
+    class Meta:
+        verbose_name = 'Оплата'
+        verbose_name_plural = 'Оплаты'
+
+    def __str__(self):
+        return self.amount
