@@ -1,6 +1,6 @@
 import django_filters
 from .models import Payment
-from courses.models import Course, Lesson
+from config.lms.models import Course, Lesson
 
 class PaymentFilter(django_filters.FilterSet):
     course = django_filters.ModelChoiceFilter(

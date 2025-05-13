@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .models import Course, Lesson, Subscription, Payment
+from .models import Course, Lesson, Subscription
 from .validators import validate_no_external_links
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -46,7 +46,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         fields = ['id', 'course', 'subscribed_at']
         read_only_fields = ['subscribed_at']
 
-class PaymentSerializer(ModelSerializer):
-    class Meta:
-        model = Payment
-        fields = '__all__'

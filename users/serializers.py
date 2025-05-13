@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
+
 from .models import Payment
 from config.lms.serializers import CourseSerializer, LessonSerializer
 from django.contrib.auth.password_validation import validate_password
@@ -51,3 +53,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['email'] = user.email
         return token
+
+class PaymentSerializer(ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
