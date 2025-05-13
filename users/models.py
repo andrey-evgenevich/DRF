@@ -64,6 +64,10 @@ class Payment(models.Model):
         choices=PAYMENT_METHOD_CHOICES,
         verbose_name='Способ оплаты'
     )
+    product_id=None
+    price_id=None
+    session_id=None
+    session_url=None
 
     class Meta:
         verbose_name = 'Платеж'

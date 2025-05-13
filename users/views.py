@@ -12,8 +12,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import CustomUser
 from .serializers import UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
-from ..lms.models import Course
-from ..lms.services.stripe_service import get_stripe_session, create_stripe_product, create_stripe_price, \
+from config.lms.models import Course
+from config.lms.services.stripe_service import get_stripe_session, create_stripe_product, create_stripe_price, \
     create_stripe_session
 
 
