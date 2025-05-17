@@ -13,9 +13,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .paginators import CoursePaginator, LessonPaginator
 from django.urls import reverse
+from .tasks import send_course_update_notification
 
-from .services.stripe_service import create_stripe_product, create_stripe_price, create_stripe_session, \
-    get_stripe_session
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -51,6 +50,38 @@ class CourseViewSet(viewsets.ModelViewSet):
                 )
             )
         return queryset
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        # Отправляем уведомления подписчикам асинхронно
+        if self.is_course_updated(instance, serializer):
+            send_course_update_notification.delay(instance.id)
+
+        return instance
+
+    def is_course_updated(self, instance, serializer):
+        """Проверяем, были ли обновлены значимые поля"""
+        old_data = serializer.instance.__dict__
+        new_data = serializer.validated_data
+
+        significant_fields = ['title', 'description', 'lessons']
+        return any(
+            field in new_data and new_data[field] != old_data.get(field)
+            for field in significant_fields
+        )
+
+    @action(detail=True, methods=['post'])
+    def publish(self, request, pk=None):
+        """Отдельное действие для публикации курса"""
+        course = self.get_object()
+        course.is_published = True
+        course.save()
+
+        # Отправляем уведомления при публикации
+        send_course_update_notification.delay(course.id)
+
+        return Response({'status': 'курс опубликован'})
 
 
 class LessonViewSet(viewsets.ModelViewSet):
