@@ -4,12 +4,9 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from .models import Subscription
 import logging
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from datetime import timedelta
 
 logger = logging.getLogger(__name__)
-User = get_user_model()
+
 
 
 @shared_task(bind=True, max_retries=3)
@@ -52,24 +49,3 @@ def send_course_update_notification(self, course_id):
         self.retry(countdown=60, exc=e)
 
 
-@shared_task
-def deactivate_inactive_users():
-    """
-    Деактивирует пользователей, которые не заходили более месяца
-    """
-    try:
-        month_ago = timezone.now() - timedelta(days=30)
-
-        inactive_users = User.objects.filter(
-            last_login__lt=month_ago,
-            is_active=True
-        )
-
-        count = inactive_users.update(is_active=False)
-
-        logger.info(f"Deactivated {count} inactive users")
-        return f"Deactivated {count} inactive users"
-
-    except Exception as e:
-        logger.error(f"Error deactivating users: {e}")
-        raise

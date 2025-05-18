@@ -144,10 +144,10 @@ REDOC_SETTINGS = {
 # Настройки для Celery
 
 # URL-адрес брокера сообщений
-CELERY_BROKER_URL = 'redis://localhost:6379' # Например, Redis, который по умолчанию работает на порту 6379
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "Australia/Tasmania"
@@ -183,7 +183,7 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'users.tasks.deactivate_inactive_users',
         'schedule': crontab(day_of_month=1, hour=0, minute=0),  # Первое число каждого месяца в 00:00
         'options': {
-            'timezone': 'Europe/Moscow'  # Должно совпадать с TIME_ZONE
+            'timezone': 'Europe/Moscow'
         }
     },
 }
