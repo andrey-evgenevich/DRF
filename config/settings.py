@@ -3,7 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 from celery.schedules import crontab
 
-from django.conf.global_settings import MEDIA_URL, MEDIA_ROOT
+from django.conf.global_settings import MEDIA_URL, MEDIA_ROOT, STATIC_ROOT, CACHES
 from dotenv import load_dotenv
 import sys
 
@@ -111,6 +111,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT =os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -118,6 +120,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'dgango.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+    }
+}
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
@@ -140,8 +149,6 @@ REDOC_SETTINGS = {
     'LAZY_RENDERING': False,
     'SPEC_URL': ('schema-json', {'format': '.json'})
 }
-
-# Настройки для Celery
 
 # URL-адрес брокера сообщений
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
