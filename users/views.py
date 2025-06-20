@@ -11,10 +11,18 @@ from .filters import PaymentFilter
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import CustomUser
-from .serializers import UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from .serializers import (
+    UserSerializer,
+    RegisterSerializer,
+    CustomTokenObtainPairSerializer,
+)
 from config.lms.models import Course
-from config.lms.services.stripe_service import get_stripe_session, create_stripe_product, create_stripe_price, \
-    create_stripe_session
+from config.lms.services.stripe_service import (
+    get_stripe_session,
+    create_stripe_product,
+    create_stripe_price,
+    create_stripe_session,
+)
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -23,10 +31,12 @@ class PaymentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PaymentFilter
 
+
 class UserListView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
+
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
@@ -38,41 +48,39 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
             return super().get_object()
         return self.request.user
 
+
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [permissions.AllowAny]
+
 
 class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        course_id = request.data.get('course_id')
+        course_id = request.data.get("course_id")
         if not course_id:
             return Response(
-                {'error': 'course_id обязателен'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "course_id обязателен"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
             course = Course.objects.get(pk=course_id)
         except Course.DoesNotExist:
             return Response(
-                {'error': 'Курс не найден'},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Курс не найден"}, status=status.HTTP_404_NOT_FOUND
             )
 
         # Создаем запись о платеже
         payment = Payment.objects.create(
-            user=request.user,
-            course=course,
-            amount=course.price,
-            status='pending'
+            user=request.user, course=course, amount=course.price, status="pending"
         )
 
         # Создаем продукт и цену в Stripe
@@ -82,17 +90,13 @@ class PaymentCreateAPIView(generics.CreateAPIView):
 
             # Создаем сессию оплаты
             success_url = request.build_absolute_uri(
-                reverse('payment-success', kwargs={'pk': payment.pk})
+                reverse("payment-success", kwargs={"pk": payment.pk})
             )
             cancel_url = request.build_absolute_uri(
-                reverse('payment-cancel', kwargs={'pk': payment.pk})
+                reverse("payment-cancel", kwargs={"pk": payment.pk})
             )
 
-            session = create_stripe_session(
-                price.id,
-                success_url,
-                cancel_url
-            )
+            session = create_stripe_session(price.id, success_url, cancel_url)
 
             # Обновляем платеж
             payment.stripe_product_id = product.id
@@ -101,19 +105,22 @@ class PaymentCreateAPIView(generics.CreateAPIView):
             payment.payment_url = session.url
             payment.save()
 
-            return Response({
-                'payment_id': payment.id,
-                'payment_url': session.url,
-                'status': 'pending'
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    "payment_id": payment.id,
+                    "payment_url": session.url,
+                    "status": "pending",
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
         except Exception as e:
-            payment.status = 'failed'
+            payment.status = "failed"
             payment.save()
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class PaymentStatusAPIView(generics.RetrieveAPIView):
     serializer_class = PaymentSerializer
@@ -124,27 +131,27 @@ class PaymentStatusAPIView(generics.RetrieveAPIView):
         payment = self.get_object()
         if payment.user != request.user:
             return Response(
-                {'error': 'Доступ запрещен'},
-                status=status.HTTP_403_FORBIDDEN
+                {"error": "Доступ запрещен"}, status=status.HTTP_403_FORBIDDEN
             )
 
         # Проверяем статус в Stripe
         try:
             session = get_stripe_session(payment.stripe_session_id)
-            if session.payment_status == 'paid':
-                payment.status = 'paid'
+            if session.payment_status == "paid":
+                payment.status = "paid"
                 payment.save()
 
-            return Response({
-                'payment_id': payment.id,
-                'status': payment.status,
-                'stripe_status': session.payment_status
-            })
+            return Response(
+                {
+                    "payment_id": payment.id,
+                    "status": payment.status,
+                    "stripe_status": session.payment_status,
+                }
+            )
 
         except Exception as e:
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
@@ -152,10 +159,11 @@ class PaymentSuccessView(View):
     def get(self, request, pk):
         payment = get_object_or_404(Payment, pk=pk)
         # Можно добавить логику при успешной оплате
-        return redirect(f'https://your-frontend.com/payment/success/{pk}/')
+        return redirect(f"https://your-frontend.com/payment/success/{pk}/")
+
 
 class PaymentCancelView(View):
     def get(self, request, pk):
         payment = get_object_or_404(Payment, pk=pk)
         # Можно добавить логику при отмене оплаты
-        return redirect(f'https://your-frontend.com/payment/cancel/{pk}/')
+        return redirect(f"https://your-frontend.com/payment/cancel/{pk}/")

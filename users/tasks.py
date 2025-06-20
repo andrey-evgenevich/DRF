@@ -17,14 +17,13 @@ def deactivate_inactive_users(self, months_inactive=6):
     try:
         cutoff_date = timezone.now() - timedelta(days=months_inactive * 30)
 
-        inactive_users = User.objects.filter(
-            is_active=True,
-            last_login__lt=cutoff_date
-        )
+        inactive_users = User.objects.filter(is_active=True, last_login__lt=cutoff_date)
 
         count = inactive_users.update(is_active=False)
 
-        logger.info(f"Deactivated {count} inactive users (last login before {cutoff_date})")
+        logger.info(
+            f"Deactivated {count} inactive users (last login before {cutoff_date})"
+        )
         return f"Deactivated {count} inactive users"
 
     except Exception as e:
