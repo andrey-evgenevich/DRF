@@ -1,48 +1,30 @@
 from celery import shared_task
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
-from .models import Subscription
-import logging
-
-logger = logging.getLogger(__name__)
+from lms.models import Course
+from config.settings import DEFAULT_FROM_EMAIL
 
 
-@shared_task(bind=True, max_retries=3)
-def send_course_update_notification(self, course_id):
-    try:
-        course_subscriptions = Subscription.objects.filter(
-            course_id=course_id
-        ).select_related("user", "course")
+@shared_task
+def send_mail_update_course(course_id):
+    """Отправка подписчикам уведомлений об изменениях в курсе"""
+    course = get_object_or_404(Course, id=course_id)
+    subscriptions = course.course_subscription.all()
+    recipient_list = [sub.user.email for sub in subscriptions]
+    subject = f"Курс {course.name} обновлен!"
+    message = f'Здравствуйте! Сообщаем, что в курсе "{course.name}" обновления!'
 
-        if not course_subscriptions.exists():
-            logger.info(f"No subscribers for course {course_id}")
-            return
+    from_email = DEFAULT_FROM_EMAIL
 
-        for subscription in course_subscriptions:
-            try:
-                subject = f"Обновление курса: {subscription.course.title}"
-                message = render_to_string(
-                    "emails/course_update.html",
-                    {"course": subscription.course, "user": subscription.user},
-                )
+    # Отправка письма
+    responses = {}
 
-                send_mail(
-                    subject=subject,
-                    message="",  # Текстовая версия (пустая, так как используем html_message)
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[subscription.user.email],
-                    html_message=message,
-                    fail_silently=False,
-                )
-                logger.info(f"Sent update to {subscription.user.email}")
+    for recipient in recipient_list:
+        try:
+            send_mail(subject, message, from_email, [recipient])
 
-            except Exception as e:
-                logger.error(f"Error sending to {subscription.user.email}: {e}")
-                continue
+            responses[recipient] = "Успешно отправлено"
+        except Exception as e:
+            responses[recipient] = f"Ошибка: {str(e)}"
 
-        return f"Sent updates to {course_subscriptions.count()} subscribers"
-
-    except Exception as e:
-        logger.error(f"Error processing course update: {e}")
-        self.retry(countdown=60, exc=e)
+    print(responses)

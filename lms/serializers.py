@@ -1,59 +1,44 @@
+from .models import Course, Lesson, CourseSubscription, CoursePayment
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
-
-from .models import Course, Lesson, Subscription
-from .validators import validate_no_external_links
+from lms.validators import validate_url
 
 
-class LessonSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class LessonSerializer(ModelSerializer):
+    url = serializers.URLField(validators=[validate_url])
 
     class Meta:
         model = Lesson
-        fields = [
-            "id",
-            "course",
-            "title",
-            "description",
-            "preview",
-            "video_link",
-            "created_at",
-            "updated_at",
-        ]
-        extra_kwargs = {"video_link": {"validators": [validate_no_external_links]}}
+        fields = "__all__"
 
 
-class CourseSerializer(serializers.ModelSerializer):
-    lessons_count = serializers.SerializerMethodField()
-    lessons = LessonSerializer(many=True, read_only=True, source="lessons.all")
-    is_subscribed = serializers.SerializerMethodField()
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class CourseSubscriptionSerializer(ModelSerializer):
+
+    class Meta:
+        model = CourseSubscription
+        fields = ["course"]
+
+
+class CourseSerializer(ModelSerializer):
+    lessons_count = SerializerMethodField()
+    lessons = LessonSerializer(many=True)
+    subscription = serializers.SerializerMethodField()
+    lessons = LessonSerializer(many=True, read_only=True)
+
+    def get_subscription(self, course):
+        currency_user = self.context.get("request", None).user
+        return course.course_subscription.filter(user=currency_user).exists()
+
+    def get_lessons_count(self, course):
+        return course.lessons.count()
 
     class Meta:
         model = Course
-        fields = [
-            "id",
-            "title",
-            "preview",
-            "description",
-            "created_at",
-            "updated_at",
-            "lessons_count",
-            "lessons",
-        ]
-
-    def get_lessons_count(self, obj):
-        return obj.lessons.count()
-
-    def get_is_subscribed(self, obj):
-        request = self.context.get("request")
-        if request and request.user.is_authenticated:
-            return obj.subscriptions.filter(user=request.user).exists()
-        return False
+        fields = "__all__"
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class CoursePaymentSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = Subscription
-        fields = ["id", "course", "subscribed_at"]
-        read_only_fields = ["subscribed_at"]
+        model = CoursePayment
+        fields = "__all__"

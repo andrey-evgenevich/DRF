@@ -1,31 +1,31 @@
-from django.urls import path, include
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
     CourseViewSet,
-    LessonListCreateAPIView,
-    LessonRetrieveUpdateDestroyAPIView,
-    SubscriptionViewSet,
+    LessonCreateApiView,
+    LessonListApiView,
+    LessonUpdateApiView,
+    LessonDestroyApiView,
+    LessonRetrieveApiView,
+    CourseSubscriptionApiView,
+    CoursePaymentCreateApiView,
 )
 
+app_name = "lms"
+
 router = DefaultRouter()
-router.register(r"courses", CourseViewSet)
+router.register(r"course", CourseViewSet, basename="course")
 
 urlpatterns = [
-    path("", include(router.urls)),
-    path("lessons/", LessonListCreateAPIView.as_view(), name="lesson-list"),
+    path("lesson/", LessonListApiView.as_view(), name="lesson_list"),
+    path("lesson/<int:pk>", LessonRetrieveApiView.as_view(), name="lesson_retrieve"),
+    path("lesson/create", LessonCreateApiView.as_view(), name="lesson_create"),
+    path("lesson/<int:pk>/update", LessonUpdateApiView.as_view(), name="lesson_update"),
     path(
-        "lessons/<int:pk>/",
-        LessonRetrieveUpdateDestroyAPIView.as_view(),
-        name="lesson-detail",
+        "lesson/<int:pk>/delete", LessonDestroyApiView.as_view(), name="lesson_delete"
     ),
     path(
-        "subscribe/",
-        SubscriptionViewSet.as_view({"post": "subscribe"}),
-        name="subscribe",
+        "course/subscribe", CourseSubscriptionApiView.as_view(), name="course_subscribe"
     ),
-    path(
-        "unsubscribe/",
-        SubscriptionViewSet.as_view({"post": "unsubscribe"}),
-        name="unsubscribe",
-    ),
-]
+    path("payment/", CoursePaymentCreateApiView.as_view(), name="payment"),
+] + router.urls

@@ -1,21 +1,8 @@
 from django.contrib import admin
-from .models import Course, Lesson
+from django.apps import apps
 
 
-class LessonInline(admin.TabularInline):
-    model = Lesson
-    extra = 1
+app = apps.get_app_config("lms")
 
-
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ("title", "created_at", "updated_at")
-    search_fields = ("title", "description")
-    inlines = [LessonInline]
-
-
-@admin.register(Lesson)
-class LessonAdmin(admin.ModelAdmin):
-    list_display = ("title", "course", "created_at", "updated_at")
-    list_filter = ("course",)
-    search_fields = ("title", "description")
+for model in app.models.values():
+    admin.site.register(model)
