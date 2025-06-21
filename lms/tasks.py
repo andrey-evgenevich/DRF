@@ -12,7 +12,9 @@ def send_mail_update_course(course_id):
     subscriptions = course.course_subscription.all()
     recipient_list = [sub.user.email for sub in subscriptions]
     subject = f"Курс {course.name} обновлен!"
-    message = f'Здравствуйте! Сообщаем, что в курсе "{course.name}" обновления!'
+    message = (
+        f'Здравствуйте! Сообщаем, что в курсе "{course.name}" обновления!'
+    )
 
     from_email = DEFAULT_FROM_EMAIL
 

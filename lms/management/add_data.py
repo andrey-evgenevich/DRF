@@ -16,10 +16,18 @@ class Command(BaseCommand):
         Payment.objects.all().delete()
 
         call_command("loaddata", "course_fixture.json", format="json")
-        self.stdout.write(self.style.SUCCESS("Курсы загружены из фикстур успешно"))
+        self.stdout.write(
+            self.style.SUCCESS("Курсы загружены из фикстур успешно")
+        )
         call_command("loaddata", "lesson_fixture.json", format="json")
-        self.stdout.write(self.style.SUCCESS("Уроки загружены из фикстур успешно"))
+        self.stdout.write(
+            self.style.SUCCESS("Уроки загружены из фикстур успешно")
+        )
         call_command("loaddata", "users_fixture.json", format="json")
-        self.stdout.write(self.style.SUCCESS("Уроки загружены из фикстур успешно"))
+        self.stdout.write(
+            self.style.SUCCESS("Уроки загружены из фикстур успешно")
+        )
         call_command("loaddata", "payment_fixture.json", format="json")
-        self.stdout.write(self.style.SUCCESS("Уроки загружены из фикстур успешно"))
+        self.stdout.write(
+            self.style.SUCCESS("Уроки загружены из фикстур успешно")
+        )

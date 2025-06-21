@@ -12,7 +12,9 @@ class CustomUser(AbstractUser):
     phone = models.CharField(
         max_length=15, blank=True, null=True, verbose_name="Телефон"
     )
-    city = models.CharField(max_length=30, blank=True, null=True, verbose_name="Город")
+    city = models.CharField(
+        max_length=30, blank=True, null=True, verbose_name="Город"
+    )
     avatar = models.ImageField(
         upload_to="avatar", blank=True, null=True, verbose_name="Аватар"
     )
@@ -41,7 +43,9 @@ class Payment(models.Model):
         related_name="payments",
         verbose_name="Пользователь",
     )
-    payment_date = models.DateField(auto_now_add=True, verbose_name="Дата оплаты")
+    payment_date = models.DateField(
+        auto_now_add=True, verbose_name="Дата оплаты"
+    )
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,

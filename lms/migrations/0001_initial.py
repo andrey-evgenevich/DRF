@@ -24,7 +24,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(max_length=50, verbose_name="Название курса"),
+                    models.CharField(
+                        max_length=50, verbose_name="Название курса"
+                    ),
                 ),
                 (
                     "price",
@@ -43,7 +45,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(blank=True, null=True, verbose_name="Описание"),
+                    models.TextField(
+                        blank=True, null=True, verbose_name="Описание"
+                    ),
                 ),
             ],
             options={
@@ -63,11 +67,17 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("amount", models.PositiveIntegerField(verbose_name="сумма оплаты")),
+                (
+                    "amount",
+                    models.PositiveIntegerField(verbose_name="сумма оплаты"),
+                ),
                 (
                     "session_id",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="id сессии"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="id сессии",
                     ),
                 ),
                 (
@@ -117,11 +127,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(max_length=50, verbose_name="Название урока"),
+                    models.CharField(
+                        max_length=50, verbose_name="Название урока"
+                    ),
                 ),
                 (
                     "description",
-                    models.TextField(blank=True, null=True, verbose_name="Описание"),
+                    models.TextField(
+                        blank=True, null=True, verbose_name="Описание"
+                    ),
                 ),
                 (
                     "preview",
@@ -134,7 +148,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "url",
-                    models.URLField(max_length=300, verbose_name="Ссылка на видео"),
+                    models.URLField(
+                        max_length=300, verbose_name="Ссылка на видео"
+                    ),
                 ),
             ],
             options={

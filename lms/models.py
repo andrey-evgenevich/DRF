@@ -4,13 +4,23 @@ from django.conf import settings
 
 class Course(models.Model):
     name = models.CharField(max_length=50, verbose_name="Название курса")
-    price = models.PositiveIntegerField(default=100, verbose_name="Цена в долларах")
-    preview = models.ImageField(
-        upload_to="course", blank=True, null=True, verbose_name="Картинка курса"
+    price = models.PositiveIntegerField(
+        default=100, verbose_name="Цена в долларах"
     )
-    description = models.TextField(blank=True, null=True, verbose_name="Описание")
+    preview = models.ImageField(
+        upload_to="course",
+        blank=True,
+        null=True,
+        verbose_name="Картинка курса",
+    )
+    description = models.TextField(
+        blank=True, null=True, verbose_name="Описание"
+    )
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
     )
 
     class Meta:
@@ -20,9 +30,14 @@ class Course(models.Model):
 
 class Lesson(models.Model):
     name = models.CharField(max_length=50, verbose_name="Название урока")
-    description = models.TextField(blank=True, null=True, verbose_name="Описание")
+    description = models.TextField(
+        blank=True, null=True, verbose_name="Описание"
+    )
     preview = models.ImageField(
-        upload_to="lesson", blank=True, null=True, verbose_name="Картинка урока"
+        upload_to="lesson",
+        blank=True,
+        null=True,
+        verbose_name="Картинка урока",
     )
     course = models.ForeignKey(
         Course,
@@ -34,7 +49,10 @@ class Lesson(models.Model):
     )
     url = models.URLField(max_length=300, verbose_name="Ссылка на видео")
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
     )
 
     class Meta:

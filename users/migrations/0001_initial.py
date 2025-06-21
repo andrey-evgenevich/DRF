@@ -29,7 +29,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "password",
+                    models.CharField(max_length=128, verbose_name="password"),
+                ),
                 (
                     "last_login",
                     models.DateTimeField(
@@ -75,31 +78,43 @@ class Migration(migrations.Migration):
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
+                        default=django.utils.timezone.now,
+                        verbose_name="date joined",
                     ),
                 ),
                 (
                     "email",
                     models.EmailField(
-                        max_length=254, unique=True, verbose_name="Электронная почта"
+                        max_length=254,
+                        unique=True,
+                        verbose_name="Электронная почта",
                     ),
                 ),
                 (
                     "phone",
                     models.CharField(
-                        blank=True, max_length=15, null=True, verbose_name="Телефон"
+                        blank=True,
+                        max_length=15,
+                        null=True,
+                        verbose_name="Телефон",
                     ),
                 ),
                 (
                     "city",
                     models.CharField(
-                        blank=True, max_length=30, null=True, verbose_name="Город"
+                        blank=True,
+                        max_length=30,
+                        null=True,
+                        verbose_name="Город",
                     ),
                 ),
                 (
                     "avatar",
                     models.ImageField(
-                        blank=True, null=True, upload_to="avatar", verbose_name="Аватар"
+                        blank=True,
+                        null=True,
+                        upload_to="avatar",
+                        verbose_name="Аватар",
                     ),
                 ),
                 (
@@ -147,18 +162,25 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_date",
-                    models.DateField(auto_now_add=True, verbose_name="Дата оплаты"),
+                    models.DateField(
+                        auto_now_add=True, verbose_name="Дата оплаты"
+                    ),
                 ),
                 (
                     "amount",
                     models.DecimalField(
-                        decimal_places=2, max_digits=10, verbose_name="Сумма платежа"
+                        decimal_places=2,
+                        max_digits=10,
+                        verbose_name="Сумма платежа",
                     ),
                 ),
                 (
                     "method",
                     models.CharField(
-                        choices=[("cash", "Наличные"), ("transfer", "Перевод")],
+                        choices=[
+                            ("cash", "Наличные"),
+                            ("transfer", "Перевод"),
+                        ],
                         default="transfer",
                         max_length=8,
                         verbose_name="Способ оплаты",
